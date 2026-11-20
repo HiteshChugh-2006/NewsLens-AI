@@ -13,6 +13,7 @@ build/
 venv/
 env/
 .env/
+.venv/
 
 # IDE
 .vscode/
@@ -38,3 +39,12 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Environment variables (Azure credentials)
+.env
+
+# SQLite database
+*.db
+
+# Pipeline log
+pipeline.log
