@@ -54,9 +54,8 @@ def load_dataset_stats():
     return stats
 
 
-@st.cache_data(ttl=3600)
 def load_model_metrics():
-    """Load model comparison metrics from training report."""
+    """Load model comparison metrics from training report (always fresh from disk)."""
     csv_path = os.path.join(PROJECT_ROOT, "reports", "model_comparison.csv")
     metrics = {"accuracy": "N/A", "f1": "N/A", "models_trained": 0, "loaded": False}
     try:

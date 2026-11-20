@@ -32,9 +32,8 @@ st.markdown(get_custom_css(), unsafe_allow_html=True)
 
 
 # ─── Helper Functions ────────────────────────────────────────────────────────
-@st.cache_data(ttl=3600)
 def load_comparison_data():
-    """Load model comparison CSV if available."""
+    """Load model comparison CSV if available (always reads latest from disk)."""
     csv_path = os.path.join(BASE_DIR, "reports", "model_comparison.csv")
     if os.path.exists(csv_path):
         try:
@@ -114,12 +113,21 @@ if df is None or df.empty:
     </div>
     """, unsafe_allow_html=True)
 else:
-    # Identify model column and metric columns
+    # Identify model column and metric columns dynamically
     model_col = None
-    for c in ["Model", "model", "Classifier", "classifier", "Name", "name"]:
-        if c in df.columns:
+    for c in df.columns:
+        cl = c.lower().strip()
+        if cl in ["model_name", "model", "classifier", "name", "algorithm", "modelname"]:
             model_col = c
             break
+
+    if model_col is None:
+        # Fallback to the first non-numeric column
+        non_numeric = [c for c in df.columns if not pd.api.types.is_numeric_dtype(df[c])]
+        if non_numeric:
+            model_col = non_numeric[0]
+        elif len(df.columns) > 0:
+            model_col = df.columns[0]
 
     metric_cols = [c for c in df.columns if c != model_col and pd.api.types.is_numeric_dtype(df[c])]
 
@@ -134,14 +142,20 @@ else:
         cl = c.lower().strip()
         if "acc" in cl:
             acc_col = c
-        if "f1" in cl:
+        if cl == "f1" or (cl.startswith("f1") and "cv" not in cl):
             f1_col = c
+
+    if f1_col is None:
+        for c in df.columns:
+            if "f1" in c.lower():
+                f1_col = c
+                break
 
     if acc_col:
         best_acc_idx = df[acc_col].idxmax()
         best_acc = df.loc[best_acc_idx, acc_col]
         if model_col:
-            best_model_name = df.loc[best_acc_idx, model_col]
+            best_model_name = str(df.loc[best_acc_idx, model_col])
 
     if f1_col:
         best_f1 = df[f1_col].max()
