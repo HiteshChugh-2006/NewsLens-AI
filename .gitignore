@@ -48,3 +48,5 @@ Thumbs.db
 
 # Pipeline log
 pipeline.log
+
+*.sanitized.png
