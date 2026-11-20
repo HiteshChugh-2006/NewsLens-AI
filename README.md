@@ -1,299 +1,228 @@
-# 📰 AI-Based News Article Analysis System Using Microsoft Azure AI
+# 🔍 NewsLens AI: AI-Based News Article Analysis System
+### Powered by Microsoft Azure AI Language & Machine Learning
 
 [![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge&logo=python)](https://www.python.org/)
 [![Microsoft Azure](https://img.shields.io/badge/Microsoft%20Azure-AI%20Language-0078D4?style=for-the-badge&logo=microsoft-azure)](https://azure.microsoft.com/en-us/products/ai-services/ai-language)
-[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3-orange?style=for-the-badge&logo=scikit-learn)](https://scikit-learn.org/)
-[![XGBoost](https://img.shields.io/badge/XGBoost-2.0-green?style=for-the-badge&logo=xgboost)](https://xgboost.readthedocs.io/)
+[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.9-orange?style=for-the-badge&logo=scikit-learn)](https://scikit-learn.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-3.1-green?style=for-the-badge&logo=xgboost)](https://xgboost.readthedocs.io/)
 [![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite)](https://www.sqlite.org/)
-[![Streamlit](https://img.shields.io/badge/Streamlit-1.28-red?style=for-the-badge&logo=streamlit)](https://streamlit.io/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.67-red?style=for-the-badge&logo=streamlit)](https://streamlit.io/)
 
-An end-to-end multi-tier intelligence platform designed for news credibility assessment, affective tone analysis, and thematic extraction. Developed as an enhanced academic project for the **Industrial Internship Examination** aligned with the **Microsoft Certified: Azure AI Fundamentals (AI-901)** curriculum.
+An enterprise-grade, multi-tier news article intelligence and veracity evaluation platform. Combines high-performance, debiased classical Natural Language Processing (LinearSVC achieving **99.08% peak accuracy**) with cloud-native **Microsoft Azure AI Language Cognitive Services** (document-level sentiment distributions and key phrase extraction) and an ACID-compliant **SQLite audit persistence layer**.
 
----
-
-## 🎯 Executive Summary & Objectives
-
-Modern digital misinformation is rarely just false text; it is frequently packaged with charged sentiment, sensational phrasing, and deceptive editorial framing. Traditional fake news classifiers only yield a binary label without explaining narrative sentiment or underlying topics.
-
-This project enhances an existing high-accuracy Machine Learning Fake News Detection System into a comprehensive **AI-Based News Article Analysis System** by combining:
-
-1. **Classical Machine Learning Classifier**: TF-IDF feature extraction with an ensemble of evaluated algorithms (Logistic Regression, Multinomial Naive Bayes, Linear SVC, and XGBoost achieving 99.81% accuracy) to predict whether news is **REAL** or **FAKE**.
-2. **Microsoft Azure AI Language (Sentiment Analysis)**: Cloud Cognitive Service analyzing document-level emotional polarity (Positive, Neutral, Negative) and confidence scores, treated strictly independently from truthfulness.
-3. **Microsoft Azure AI Language (Key Phrase Extraction)**: Cloud Cognitive Service automatically isolating the salient entities, keywords, and topics of the article.
-4. **Local SQLite Database (`news_analysis.db`)**: Persistent, zero-configuration, ACID-compliant audit database storing all inputs, ML predictions, Azure sentiment confidences, and extracted keywords with parameterized SQL queries.
-5. **Interactive Streamlit Dashboard**: A professional 6-page dark-mode web dashboard featuring interactive Plotly visualizations, live SQLite KPI tracking, word-level explainability, and database record inspection.
+Developed as an academic capstone project aligned with the **Microsoft Certified: Azure AI Fundamentals (AI-901)** global curriculum.
 
 ---
 
-## 📐 System Architecture
+## 🎯 Executive Overview & Objectives
 
-The following diagram illustrates the flow from article ingestion to dual-path AI inference, persistence, and presentation:
+Modern digital disinformation is rarely just factually incorrect text; it is frequently packaged with emotionally charged sentiment, clickbait rhetoric, and deceptive editorial framing. Traditional fake news classifiers only yield a binary label without explaining narrative sentiment or underlying topics.
+
+**NewsLens AI** resolves these limitations by unifying three complementary dimensions of content evaluation:
+
+1. **Supervised Veracity Classification (Offline ML)**: High-dimensional TF-IDF vectorization (40,000 sublinear unigram/bigram features) with five benchmarked classifiers (LinearSVC, Logistic Regression, Soft Voting Ensemble, XGBoost, and Multinomial Naive Bayes).
+2. **Publisher Debiasing Engine**: Automated regular expression sanitization pipeline that strips wire agency datelines (`Reuters`, `AP`), author watermarks, and social media handles from training corpora—preventing catastrophic "Clever Hans" artifact leakage and restoring genuine out-of-domain generalization.
+3. **Microsoft Azure AI Language (Sentiment & Key Phrases)**: Cloud-native cognitive service evaluating document emotional polarity (Positive, Neutral, Negative confidence distributions) strictly independently from truthfulness, alongside automated salient entity and topic discovery.
+4. **Persistent Audit Database (`news_analysis.db`)**: Local, zero-configuration, ACID-compliant relational SQLite database tracking every evaluated article with parameterized SQL queries, serialized JSON confidence payloads, and microsecond audit timestamps.
+5. **Microsoft Fluent Multi-Page Interface**: A modern 6-page web dashboard adhering to Microsoft Fluent Design principles (emerald accents `#059669`, clean cards, responsive Plotly charts, and linear feature explainability).
+
+---
+
+## 📐 Multi-Tier System Architecture
 
 ```
-                                  ┌───────────────────────────┐
-                                  │    User Article Input     │
-                                  │ (Direct Paste or Samples) │
-                                  └─────────────┬─────────────┘
-                                                │
-                     ┌──────────────────────────┴──────────────────────────┐
-                     │                                                     │
-                     ▼                                                     ▼
-      [ Classical Machine Learning Branch ]             [ Microsoft Azure AI Language Branch ]
-  ┌───────────────────────────────────────┐             ┌────────────────────────────────────┐
-  │ 1. NLTK Text Cleaning & Tokenization  │             │ 1. Authenticate with Endpoint & Key│
-  │ 2. Stopword Removal & Lemmatization   │             │ 2. Payload Validation & Truncation │
-  │ 3. 50,000-dim TF-IDF Feature Mapping  │             │ 3. azure-ai-textanalytics Client   │
-  │ 4. Calibrated Model Inference         │             │ 4. Parallel Service Calls:         │
-  │    (XGBoost / LinearSVC / LogReg)     │             │    • analyze_sentiment()           │
-  │                                       │             │    • extract_key_phrases()         │
-  │ Output: FAKE/REAL + Confidence Score  │             │ Output: Tone Scores + Salient Tags │
-  └──────────────────┬────────────────────┘             └─────────────────┬──────────────────┘
-                     │                                                     │
-                     └──────────────────────────┬──────────────────────────┘
-                                                │
-                                                ▼
-                               ┌─────────────────────────────────┐
-                               │     Consolidated Analysis       │
-                               └────────────────┬────────────────┘
-                                                │
-                     ┌──────────────────────────┴──────────────────────────┐
-                     ▼                                                     ▼
-     ┌───────────────────────────────┐                     ┌───────────────────────────────┐
-     │   SQLite Database Storage     │                     │     Streamlit Dashboard       │
-     │   (`news_analysis.db`)        │                     │   (Multi-Page UI & Plotly)    │
-     │                               │                     │                               │
-     │ • Parameterized INSERT        │                     │ • Real-time Prediction Gauges │
-     │ • JSON Confidence Dicts       │                     │ • Azure Sentiment Stacked Bar │
-     │ • Audit Timestamps            │                     │ • Interactive Phrase Tags     │
-     │ • CRUD & Historical Analytics │                     │ • Word-Level Feature Bar Chart│
-     └───────────────────────────────┘                     └───────────────────────────────┘
+                                ┌───────────────────────────┐
+                                │    User Article Input     │
+                                │ (Direct Paste or Samples) │
+                                └─────────────┬─────────────┘
+                                              │
+                   ┌──────────────────────────┴──────────────────────────┐
+                   │                                                     │
+                   ▼                                                     ▼
+    [ Classical Machine Learning Branch ]             [ Microsoft Azure AI Language Branch ]
+┌───────────────────────────────────────┐             ┌────────────────────────────────────┐
+│ 1. Regex Publisher Debiasing Engine   │             │ 1. AzureKeyCredential & Endpoint   │
+│    (Strips datelines, credits, marks) │             │ 2. Word-Boundary Truncation Guard  │
+│ 2. NLTK Tokenization & Lemmatization  │             │    (Strict 5,000 character limit)  │
+│ 3. 40,000-dim Sublinear TF-IDF Matrix │             │ 3. azure-ai-textanalytics Client   │
+│ 4. Calibrated Model Inference:        │             │ 4. Parallel Cognitive Service APIs:│
+│    • LinearSVC (Champion: 99.08%)     │             │    • analyze_sentiment()           │
+│    • Logistic Regression (98.49%)     │             │    • extract_key_phrases()         │
+│    • Soft Voting Ensemble (98.42%)    │             │                                    │
+│ Output: FAKE/REAL + Confidence Score  │             │ Output: Tone Scores + Salient Tags │
+└──────────────────┬────────────────────┘             └─────────────────┬──────────────────┘
+                   │                                                     │
+                   └──────────────────────────┬──────────────────────────┘
+                                              │
+                                              ▼
+                             ┌─────────────────────────────────┐
+                             │     Consolidated Analysis       │
+                             └────────────────┬────────────────┘
+                                              │
+                   ┌──────────────────────────┴──────────────────────────┐
+                   ▼                                                     ▼
+   ┌───────────────────────────────┐                     ┌───────────────────────────────┐
+   │   SQLite Database Storage     │                     │     Streamlit Dashboard       │
+   │   (`news_analysis.db`)        │                     │  (Microsoft Fluent Light UI)  │
+   │                               │                     │                               │
+   │ • Parameterized SQL INSERT    │                     │ • Real-Time Probability Gauge │
+   │ • JSON Serialized Confidences │                     │ • Azure Sentiment Stacked Bar │
+   │ • Microsecond Timestamps      │                     │ • Salient Entity Phrase Tags  │
+   │ • Historical Query & Audit    │                     │ • Word Attribution Breakdown  │
+   └───────────────────────────────┘                     └───────────────────────────────┘
 ```
+
+---
+
+## 📊 Empirical Model Performance Benchmarks
+
+All models were evaluated on the **ISOT Fake News Dataset** (44,898 articles) following regularized publisher debiasing using an 80/20 train/test split (8,980 unseen test articles) under 5-fold cross-validation:
+
+| Machine Learning Algorithm | Test Accuracy | Precision | Recall | F1-Score | ROC-AUC | 5-Fold CV F1 | Inference Latency |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **LinearSVC (Platt Calibrated) 🏆** | **99.08%** | **0.9908** | **0.9915** | **0.9912** | **0.9993** | **0.9910** | **< 2 ms** |
+| **Logistic Regression (L2)** | **98.49%** | 0.9872 | 0.9838 | 0.9855 | 0.9983 | 0.9849 | < 1 ms |
+| **Soft Voting Ensemble (Meta)** | **98.42%** | 0.9867 | 0.9830 | 0.9848 | 0.9982 | 0.9839 | ~ 4 ms |
+| **XGBoost Classifier (hist)** | **95.53%** | 0.9555 | 0.9593 | 0.9574 | 0.9901 | 0.9561 | ~ 15 ms |
+| **Multinomial Naive Bayes** | **95.12%** | 0.9514 | 0.9555 | 0.9535 | 0.9882 | 0.9552 | < 1 ms |
+
+---
+
+## 🛡️ Publisher Debiasing & Out-of-Domain Generalization
+
+Standard ISOT models suffer from catastrophic "Clever Hans" watermark leakage: because authentic articles begin with `(Reuters) -`, naive models use the agency name as a shortcut. When evaluated against authentic contemporary news lacking wire datelines, un-debiased models falsely flag real news as fake.
+
+Our regex-driven sanitization pipeline excises wire headers, author watermarks, and agency stop words:
+
+| Test News Article Snippet | Actual Status | Before Debiasing | After Debiasing (NewsLens AI) |
+| :--- | :---: | :---: | :---: |
+| *India made history on 23 August 2023 when Chandrayaan-3 successfully touched down on the lunar south pole...* | **REAL (ISRO News)** | ❌ FAKE (99.8% False Certainty) | **✅ REAL (72.9% Calibrated Confidence)** |
+| *The House passed a comprehensive $1.9 trillion relief package delivering direct assistance to families...* | **REAL (Policy Record)** | ✅ REAL (99.9% Confidence) | **✅ REAL (99.4% Calibrated Confidence)** |
+| *BREAKING: Secret underground alien military base discovered beneath city hall! Whistleblowers confirm...* | **FAKE (Conspiracy)** | ❌ FAKE (99.9% Confidence) | **❌ FAKE (99.9% Calibrated Confidence)** |
 
 ---
 
 ## 📁 Repository Structure
 
 ```
-CodeAlpha_Fake-News-Detection-System/
+NewsLens-AI/
 │
-├── dataset/                    # Training Corpus (44,898 articles)
-│   ├── Fake.csv                # 23,481 Fake news records
-│   └── True.csv                # 21,417 Real news records (Reuters)
+├── dataset/                         # Training Corpus (44,898 articles)
+│   ├── Fake.csv                     # 23,481 Fake news records
+│   └── True.csv                     # 21,417 Real news records (Reuters)
 │
-├── models/                     # Trained Model & Vectorizer Artifacts
-│   ├── best_model.joblib       # Serialized best model (XGBClassifier)
-│   ├── tfidf_vectorizer.joblib # Serialized TF-IDF vectorizer (50k features)
+├── models/                          # Serialized Model & Vectorizer Artifacts
+│   ├── best_model.joblib            # Champion Calibrated LinearSVC Model
+│   ├── tfidf_vectorizer.joblib      # 40,000-feature TF-IDF Vectorizer
 │   ├── logistic_regression.joblib
+│   ├── soft_voting_ensemble.joblib
 │   ├── multinomial_nb.joblib
-│   └── linear_svc.joblib
+│   └── xgboost_classifier.joblib
 │
-├── reports/                    # Generated Performance & Metric Reports
-│   ├── model_comparison.csv    # Accuracy, Precision, Recall, F1, ROC-AUC
-│   ├── confusion_matrix_*.png  # Model confusion matrices
-│   ├── roc_curve_*.png         # ROC-AUC curves
-│   └── model_comparison.png    # Bar chart performance comparison
+├── reports/                         # Performance Visualizations & Evaluation Data
+│   ├── model_comparison.csv         # Verified multi-metric comparison table
+│   ├── confusion_matrix_*.png       # Confusion matrices for all classifiers
+│   ├── roc_curve_*.png              # ROC curves with AUC values
+│   ├── feature_importance_*.png     # Top salient word attribution charts
+│   └── model_comparison.png         # Multi-metric comparative bar chart
 │
-├── pages/                      # Streamlit Multi-Page Application
-│   ├── 1_News_Detection.py     # 🔍 Unified Analysis (ML + Azure + DB)
-│   ├── 2_Analytics.py          # 📊 Training dataset analytics & word clouds
-│   ├── 3_Model_Performance.py  # 📈 Comprehensive model comparison metrics
-│   ├── 4_Explainability.py     # 🧠 Word attribution & feature importance
-│   ├── 5_About_Project.py      # ℹ️ System architecture & exam specifications
-│   └── 6_Analysis_History.py   # 📜 SQLite audit records log & inspector
+├── pages/                           # Streamlit Multi-Page UI Modules
+│   ├── 1_News_Detection.py          # 🔍 Live Multi-AI Analysis (ML + Azure + DB)
+│   ├── 2_Analytics.py               # 📊 Training dataset analytics & class distributions
+│   ├── 3_Model_Performance.py       # 📈 Interactive model benchmark comparison
+│   ├── 4_Explainability.py          # 🧠 Word attribution & feature weights
+│   ├── 5_About_Project.py           # ℹ️ Architecture flowcharts & documentation
+│   └── 6_Analysis_History.py        # 🗄️ SQLite audit record inspector & management
 │
-├── src/                        # Modular Source Code
-│   ├── __init__.py             # Package init & version metadata (v2.0.0)
-│   ├── azure_language.py       # ☁️ Azure AI Language SDK Client wrapper
-│   ├── database.py             # 🗄️ SQLite Database Manager & parameterized queries
-│   ├── preprocessing.py        # NLTK text cleaning, normalization, lemmatization
-│   ├── feature_engineering.py  # TF-IDF vectorization logic
-│   ├── train.py                # Hyperparameter tuning (GridSearchCV) & 5-fold CV
-│   ├── evaluate.py             # Model evaluation & report generator
-│   └── predict.py              # Inference pipeline & word contribution engine
+├── src/                             # Core Backend Logic
+│   ├── __init__.py
+│   ├── azure_language.py            # Azure AI Language SDK client wrapper
+│   ├── database.py                  # SQLite AnalysisDatabase class with parameterized SQL
+│   ├── feature_engineering.py       # FeatureEngineer TF-IDF vectorizer class
+│   ├── predict.py                   # NewsPredictor class with explainability
+│   ├── preprocessing.py             # TextPreprocessor class with debiasing regexes
+│   ├── styles.py                    # Microsoft Fluent Light Theme CSS injection
+│   └── train.py                     # 5-fold cross-validation training pipeline
 │
-├── app.py                      # 🏠 Main Dashboard & SQLite live activity summary
-├── main.py                     # ML pipeline training orchestrator
-├── test_system.py              # 🧪 Automated 10-point test suite
-├── news_analysis.db            # Auto-generated SQLite database (git-ignored)
-├── .env.example                # Azure AI credential configuration template
-├── .gitignore                  # Git ignore rules (.env, *.db, *.log, .venv/)
-├── requirements.txt            # Project dependencies
-└── README.md                   # Complete documentation
+├── docs/                            # Official Academic Documentation
+│   ├── Industrial_Internship_Report.docx # Official Chandigarh University Word Report (27 pages)
+│   ├── INDUSTRIAL_INTERNSHIP_REPORT.md   # Complete Markdown report draft
+│   └── PROJECT_REPORT.md                 # Detailed technical specifications
+│
+├── app.py                           # Application entrypoint & executive dashboard
+├── build_standard_cu_report.py      # Automated generator for university Word report
+├── main.py                          # End-to-end model training pipeline script
+├── news_analysis.db                 # ACID-compliant local SQLite audit database
+├── test_system.py                   # Automated test suite (10 validation scenarios)
+├── requirements.txt                 # Pinned project dependencies
+├── .env.example                     # Environment template for Azure credentials
+└── README.md                        # Project documentation
 ```
 
 ---
 
-## ☁️ Microsoft Azure AI Language Setup Guide
+## ⚡ Quickstart Guide
 
-This application integrates with **Azure AI Language** (part of Azure Cognitive Services). Follow these step-by-step instructions to create and configure your credentials.
+### 1. Clone the Repository & Set Up Environment
 
-### Step 1: Create an Azure Account
-- If you do not have an account, sign up at [azure.microsoft.com/free](https://azure.microsoft.com/free/).
-- Students can also register through [Azure for Students](https://azure.microsoft.com/en-us/free/students/) (provides \$100 credit without requiring a credit card).
-
-### Step 2: Create a Language Resource in Azure Portal
-1. Sign in to the [Azure Portal](https://portal.azure.com/).
-2. In the top search bar, type **Language service** and select **Language services**.
-3. Click **+ Create** / **Create language resource**.
-4. Configure the basic settings:
-   - **Subscription**: Select your active subscription.
-   - **Resource Group**: Select an existing resource group or click *Create new* (e.g., `rg-news-analysis`).
-   - **Region**: Choose a region close to you (e.g., `East US` or `Central India`).
-   - **Name**: Enter a unique name (e.g., `lang-news-analysis-prod`).
-   - **Pricing Tier**: Select **Free F0** (5,000 text records/month at zero cost) or **Standard S** if F0 is already used.
-5. Review and click **Create**. Wait for deployment to complete (takes ~1-2 minutes).
-
-### Step 3: Retrieve Endpoint URL and API Key
-1. Once deployed, click **Go to resource**.
-2. In the left navigation menu, under the **Resource Management** group, click **Keys and Endpoint**.
-3. You will see:
-   - **KEY 1** and **KEY 2** (e.g., `a1b2c3d4e5f6...`)
-   - **Endpoint** (e.g., `https://lang-news-analysis-prod.cognitiveservices.azure.com/`)
-4. Copy **KEY 1** and the **Endpoint URL**.
-
-### Step 4: Configure Local Environment Variables
-1. In your project root directory, locate `.env.example`.
-2. Create a copy of `.env.example` named `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-3. Open `.env` and paste your actual Azure values:
-   ```env
-   AZURE_LANGUAGE_ENDPOINT=https://your-resource-name.cognitiveservices.azure.com/
-   AZURE_LANGUAGE_KEY=your_actual_32_character_azure_key_here
-   ```
-4. **Security Note**: The `.env` file is already listed in `.gitignore`. Never commit your API key or endpoint to GitHub or share it in public channels.
-
-### Step 5: Offline / Fallback Capability
-If Azure credentials are not provided or network is offline:
-- The system will **not crash**.
-- The ML Fake/Real classification and SQLite logging will continue to function seamlessly.
-- An alert card in the UI will notify the user: `Azure AI Language credentials not configured. ML classification is fully operational.`
-
----
-
-## 🗄️ SQLite Database Design
-
-The local SQLite database (`news_analysis.db`) is automatically initialized on the first launch of the application.
-
-### Table Schema: `news_history`
-
-| Column Name | Data Type | Constraint | Description |
-| :--- | :--- | :--- | :--- |
-| `id` | `INTEGER` | `PRIMARY KEY AUTOINCREMENT` | Unique analysis identifier |
-| `article_text` | `TEXT` | `NOT NULL` | The full analyzed news article content |
-| `ml_prediction` | `TEXT` | `NOT NULL` | ML classification result (`FAKE` or `REAL`) |
-| `ml_confidence` | `REAL` | `NOT NULL` | Prediction probability (between `0.0` and `1.0`) |
-| `sentiment` | `TEXT` | `NOT NULL` | Azure tone (`positive`, `neutral`, `negative`, etc.) |
-| `sentiment_confidence` | `TEXT` | `NULL` | JSON string containing positive, neutral, negative scores |
-| `key_phrases` | `TEXT` | `NULL` | JSON string array of extracted key phrases |
-| `created_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | UTC timestamp of the analysis event |
-
-### Security & Integrity Features:
-- **Parameterized Queries**: All SQL executions use `?` placeholders, preventing SQL Injection vulnerabilities.
-- **JSON Serialization**: Complex nested objects (`sentiment_confidence` dict, `key_phrases` list) are safely serialized and deserialized via `json.dumps()` and `json.loads()`.
-- **Automatic Initialization**: Table creation uses `CREATE TABLE IF NOT EXISTS`.
-
----
-
-## 🚀 Installation & Running Guide
-
-### 1. Clone the Repository
 ```bash
 git clone https://github.com/HiteshChugh-2006/CodeAlpha_Fake-News-Detection-System.git
 cd CodeAlpha_Fake-News-Detection-System
-```
 
-### 2. Create and Activate a Virtual Environment
-```bash
-# Windows
+# Create and activate Python virtual environment
 python -m venv .venv
-.venv\Scripts\activate
+source .venv/bin/activate       # On Linux/macOS
+.venv\Scripts\activate          # On Windows (PowerShell)
 
-# Linux / macOS
-python3 -m venv .venv
-source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-### 4. Configure Azure Credentials (Optional but Recommended)
-```bash
-cp .env.example .env
-# Edit .env with your Azure Endpoint and Key
+### 2. Configure Microsoft Azure AI Language Credentials (Optional)
+
+Create a `.env` file in the root directory (based on `.env.example`):
+
+```ini
+AZURE_LANGUAGE_ENDPOINT=https://<your-language-resource>.cognitiveservices.azure.com/
+AZURE_LANGUAGE_KEY=<your-azure-api-secret-key>
 ```
 
-### 5. Launch the Streamlit Dashboard
+> **Note:** If Azure credentials are not provided, NewsLens AI automatically activates **Graceful Offline Mode**. Machine learning classification, explainability, and SQLite logging remain 100% operational.
+
+### 3. Launch the Streamlit Web Application
+
 ```bash
 streamlit run app.py
 ```
-Open your web browser and navigate to `http://localhost:8501`.
 
----
+Open `http://localhost:8501` in your browser.
 
-## 🧪 Automated Testing Suite
-
-To execute the automated 10-point test suite covering ML prediction, text boundary conditions, Azure client handling, and SQLite database operations:
+### 4. Execute the Automated Test Suite
 
 ```bash
 python test_system.py
 ```
 
-### Tested Scenarios:
-1. Normal news article classification with confidence scores.
-2. Empty article handling & edge case normalization.
-3. Short article classification resilience.
-4. Long article multi-paragraph processing.
-5. Missing Azure credentials graceful degradation.
-6. Azure error containment without unhandled exceptions.
-7. SQLite database auto-creation and schema verification.
-8. Saving analysis records with parameterized SQL.
-9. Retrieving records, ID lookup, statistics aggregation, and deletion.
-10. Multi-page syntax and import compatibility.
+Validates all 10 unit and integration test scenarios (ML inference, out-of-domain debiasing, edge cases, Azure fallbacks, and SQLite CRUD operations).
 
 ---
 
-## 📊 Machine Learning Model Benchmarks
+## 🎓 Academic Project Report (Chandigarh University)
 
-Trained on the **ISOT Fake News Dataset** (44,898 articles from Reuters and flagged sources):
+This project includes the official **Chandigarh University Industrial Internship Report** formatted in accordance with university template guidelines:
 
-| Model Algorithm | Accuracy | Precision | Recall | F1-Score | ROC-AUC |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **XGBoost Classifier (Best)** | **99.81%** | **99.80%** | **99.81%** | **99.81%** | **0.9998** |
-| Linear SVC (Calibrated) | 99.53% | 99.52% | 99.53% | 99.53% | 0.9996 |
-| Logistic Regression | 98.74% | 98.73% | 98.74% | 98.74% | 0.9984 |
-| Multinomial Naive Bayes | 95.22% | 95.28% | 95.22% | 95.21% | 0.9891 |
+- **Word Document:** [`docs/Industrial_Internship_Report.docx`](docs/Industrial_Internship_Report.docx)
+- **Formatting Standards:** A4 paper, Times New Roman 12pt, 1.5 line spacing, 18pt bold chapter headings.
+- **Main Content Ceiling:** **Strictly 27 pages** (conforming to the university's 25 to 30 page ceiling).
+- **Weekly Report:** Prescribed **Appendix 5** tabular layout across 6 weeks (30 daily entries) documenting real certification learning and technical implementation without fabricated attendance.
 
 ---
 
-## ⚠️ Limitations & Future Scope
+## 👤 Author & Certification Context
 
-### Limitations:
-- **Corpus Domain**: The ML classifier is trained primarily on US political and general world news (2015–2018). Novel terminology from very recent events may rely heavily on Azure Key Phrases rather than historical TF-IDF weights.
-- **Language**: Current TF-IDF vectorizer and NLTK lemmatizers are optimized for English text.
-- **Azure Quota**: The Azure Free F0 tier allows 5,000 text records/month with a rate limit of 10 calls/second.
-
-### Future Scope:
-- **Transformer Fine-Tuning**: Integration of DistilBERT or RoBERTa for contextual embeddings.
-- **Multilingual Support**: Expanding Azure AI Language multi-language capabilities for global news.
-- **Live News Feed Scraping**: Automated RSS feed ingestion with continuous background analysis.
-- **Fact-Checking Knowledge Graph**: Direct cross-referencing with claim-review APIs (Google Fact Check Tools).
-
----
-
-## 👤 Author & Academic Context
-
-- **Student Name**: Hitesh Chugh
-- **Curriculum Alignment**: Microsoft Certified: Azure AI Fundamentals (AI-901)
-- **Project Purpose**: Industrial Internship Examination Project
-- **GitHub**: [@HiteshChugh-2006](https://github.com/HiteshChugh-2006)
-- **LinkedIn**: [Hitesh Chugh](https://www.linkedin.com/in/hitesh-chugh-a80170320/)
-
----
-
-## 📜 License & Acknowledgments
-
-This project is open-source under the MIT License. Special thanks to the **University Industrial Internship Mentors** and the **Microsoft Learn** curriculum for guidance on Azure Cognitive Services and Machine Learning deployment.
+- **Candidate:** Hitesh Chugh
+- **Program:** Bachelor of Engineering in Computer Science & Engineering (AIML)
+- **Institution:** Department of Computer Science & Engineering, University Institute of Engineering, Chandigarh University, Gharuan
+- **Certification Curriculum:** Aligned with [Microsoft Certified: Azure AI Fundamentals (AI-901)](https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-fundamentals/)
+- **GitHub:** [@HiteshChugh-2006](https://github.com/HiteshChugh-2006)
+- **LinkedIn:** [Hitesh Chugh](https://www.linkedin.com/in/hitesh-chugh-a80170320/)
