@@ -76,7 +76,7 @@ st.markdown("""
         <div style="background: rgba(16, 185, 129, 0.06); padding: 16px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.25);">
             <div style="font-weight: 700; color: #047857; margin-bottom: 6px;">1. Classical ML Classifier</div>
             <div style="color: #64748B; font-size: 0.84rem; line-height: 1.55;">
-                Trained on 44,898 verified articles with TF-IDF vectorization to classify news as <strong>Real</strong> or <strong>Fake</strong> with 99.81% accuracy.
+                Trained on 44,898 verified articles with TF-IDF vectorization to classify news as <strong>Real</strong> or <strong>Fake</strong> with 99.08% peak accuracy.
             </div>
         </div>
         <div style="background: rgba(0, 120, 212, 0.06); padding: 16px; border-radius: 12px; border: 1px solid rgba(0, 120, 212, 0.25);">
@@ -102,64 +102,97 @@ st.markdown("""
 # ─── Architecture Diagram ───────────────────────────────────────────────────
 st.markdown('<div class="section-header">📐 Multi-Tier System Architecture</div>', unsafe_allow_html=True)
 
-st.markdown("""
-<div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 16px; padding: 26px; text-align: center; box-shadow: 0 2px 8px rgba(15,23,42,0.03);">
+# Top Box: Input Article
+st.markdown(
+    '<div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #059669; '
+    'padding: 14px 24px; border-radius: 12px; color: #047857; font-weight: 800; '
+    'font-size: 1.05rem; text-align: center; margin-bottom: 14px; box-shadow: 0 2px 6px rgba(5,150,105,0.08);">'
+    '📰 Raw Input News Article'
+    '</div>',
+    unsafe_allow_html=True
+)
 
-<div style="display: flex; flex-direction: column; align-items: center; gap: 14px;">
+st.markdown(
+    '<div style="text-align: center; color: #94A3B8; font-size: 1.15rem; font-weight: 700; margin: 4px 0 14px;">'
+    '⬇ Dual Parallel Processing Branches ⬇'
+    '</div>',
+    unsafe_allow_html=True
+)
 
-<!-- Input -->
-<div style="background: rgba(16, 185, 129, 0.1); border: 2px solid #059669; padding: 12px 36px; border-radius: 12px; color: #047857; font-weight: 800; font-size: 1.05rem;">
-    📰 Input News Article Text
-</div>
+arch_col1, arch_col2 = st.columns(2)
+with arch_col1:
+    st.markdown(
+        '<div style="background: #FFFFFF; border: 1.5px solid rgba(16, 185, 129, 0.35); '
+        'border-radius: 14px; padding: 18px 20px; min-height: 195px; box-shadow: 0 2px 8px rgba(15,23,42,0.04);">'
+        '<div style="color: #047857; font-weight: 800; font-size: 1.02rem; margin-bottom: 8px;">'
+        '🤖 Branch A: Classical Machine Learning'
+        '</div>'
+        '<div style="font-size: 0.84rem; color: #475569; line-height: 1.65;">'
+        '1. <strong>Preprocessing:</strong> Text cleaning, lowercasing & lemmatization<br>'
+        '2. <strong>Vectorization:</strong> TF-IDF matrix (40,000 sublinear features)<br>'
+        '3. <strong>Inference:</strong> LinearSVC / Soft Voting Ensemble<br>'
+        '<span style="display: inline-block; margin-top: 8px; padding: 4px 10px; background: rgba(16,185,129,0.12); color: #047857; font-weight: 700; border-radius: 6px; font-size: 0.8rem;">'
+        'Output: FAKE / REAL Classification + Calibrated Confidence'
+        '</span>'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
-<div style="color: #94A3B8; font-size: 1.2rem; font-weight: 700;">⬇ Parallel Processing Branches</div>
+with arch_col2:
+    st.markdown(
+        '<div style="background: #FFFFFF; border: 1.5px solid rgba(0, 120, 212, 0.35); '
+        'border-radius: 14px; padding: 18px 20px; min-height: 195px; box-shadow: 0 2px 8px rgba(15,23,42,0.04);">'
+        '<div style="color: #0078D4; font-weight: 800; font-size: 1.02rem; margin-bottom: 8px;">'
+        '☁️ Branch B: Microsoft Azure AI Language'
+        '</div>'
+        '<div style="font-size: 0.84rem; color: #475569; line-height: 1.65;">'
+        '1. <strong>Authentication:</strong> Azure Cognitive Endpoint & Secret Key<br>'
+        '2. <strong>Sentiment API:</strong> Document-level tone (Pos / Neu / Neg)<br>'
+        '3. <strong>Key Phrase API:</strong> Salient entity & thematic phrase extraction<br>'
+        '<span style="display: inline-block; margin-top: 8px; padding: 4px 10px; background: rgba(0,120,212,0.12); color: #0078D4; font-weight: 700; border-radius: 6px; font-size: 0.8rem;">'
+        'Output: Emotional Tone Scores + Salient Thematic Tags'
+        '</span>'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
-<!-- Parallel Branches -->
-<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 100%;">
+st.markdown(
+    '<div style="text-align: center; color: #94A3B8; font-size: 1.15rem; font-weight: 700; margin: 14px 0 14px;">'
+    '⬇ Persistence & User Interface ⬇'
+    '</div>',
+    unsafe_allow_html=True
+)
 
-    <!-- Branch A: ML -->
-    <div style="flex: 1; min-width: 280px; background: rgba(16, 185, 129, 0.04); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 16px;">
-        <div style="color: #047857; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">🤖 Classical ML Pipeline</div>
-        <div style="font-size: 0.82rem; color: #475569; line-height: 1.55;">
-            1. Text cleaning & normalization<br>
-            2. NLTK Lemmatization & Stopwords<br>
-            3. TF-IDF Matrix (50,000 features)<br>
-            4. Inference via Best Model (XGBoost)<br>
-            <strong style="color: #047857;">Output: FAKE / REAL + Confidence</strong>
-        </div>
-    </div>
+arch_col3, arch_col4 = st.columns(2)
+with arch_col3:
+    st.markdown(
+        '<div style="background: #FFFFFF; border: 1.5px solid rgba(217, 119, 6, 0.35); '
+        'border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(15,23,42,0.04);">'
+        '<div style="color: #D97706; font-weight: 800; font-size: 0.98rem; margin-bottom: 6px;">'
+        '🗄️ SQLite Database (news_analysis.db)'
+        '</div>'
+        '<div style="font-size: 0.82rem; color: #64748B; line-height: 1.5;">'
+        'Parameterized SQL storage, audit logging, multi-metric serialization, and full historical retrieval.'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
-    <!-- Branch B: Azure AI -->
-    <div style="flex: 1; min-width: 280px; background: rgba(0, 120, 212, 0.04); border: 1px solid rgba(0, 120, 212, 0.25); border-radius: 12px; padding: 16px;">
-        <div style="color: #0078D4; font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">☁️ Microsoft Azure AI Language</div>
-        <div style="font-size: 0.82rem; color: #475569; line-height: 1.55;">
-            1. Authenticate with Cognitive Endpoint<br>
-            2. Sentiment Analysis API<br>
-            3. Key Phrase Extraction API<br>
-            4. Truncation & batch guards<br>
-            <strong style="color: #0078D4;">Output: Sentiment Scores + Salient Tags</strong>
-        </div>
-    </div>
-
-</div>
-
-<div style="color: #94A3B8; font-size: 1.2rem; font-weight: 700;">⬇ Persistence & Interface</div>
-
-<!-- Storage & UI -->
-<div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; width: 100%;">
-    <div style="flex: 1; background: rgba(217, 119, 6, 0.06); border: 1px solid rgba(217, 119, 6, 0.3); border-radius: 10px; padding: 12px; font-weight: 600; color: #D97706;">
-        🗄️ SQLite Database (news_analysis.db)<br>
-        <span style="font-size: 0.75rem; color: #64748B; font-weight: 400;">Parameterized SQL Storage & History Tracking</span>
-    </div>
-    <div style="flex: 1; background: rgba(5, 150, 105, 0.06); border: 1px solid rgba(5, 150, 105, 0.3); border-radius: 10px; padding: 12px; font-weight: 600; color: #047857;">
-        📱 Streamlit Dashboard UI<br>
-        <span style="font-size: 0.75rem; color: #64748B; font-weight: 400;">Microsoft Fluent Layouts, Plotly Visuals, Explainability</span>
-    </div>
-</div>
-
-</div>
-</div>
-""", unsafe_allow_html=True)
+with arch_col4:
+    st.markdown(
+        '<div style="background: #FFFFFF; border: 1.5px solid rgba(5, 150, 105, 0.35); '
+        'border-radius: 14px; padding: 16px 20px; box-shadow: 0 2px 8px rgba(15,23,42,0.04);">'
+        '<div style="color: #047857; font-weight: 800; font-size: 0.98rem; margin-bottom: 6px;">'
+        '📱 Streamlit Dashboard UI'
+        '</div>'
+        '<div style="font-size: 0.82rem; color: #64748B; line-height: 1.5;">'
+        'Microsoft Fluent styling, responsive Plotly charts, NLTK explainability, and multi-page routing.'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
 
 
 # ─── Tech Stack ──────────────────────────────────────────────────────────────
@@ -207,8 +240,8 @@ with tc2:
         </div>
         <div style="color: #64748B; font-size: 0.83rem; line-height: 1.65;">
             <strong>Scikit-learn, XGBoost & NLTK</strong> powering local offline inference.<br><br>
-            • <strong>TF-IDF Vectorizer:</strong> 50,000 unigram/bigram features.<br>
-            • <strong>Champion Model:</strong> XGBoost with 99.81% accuracy & calibrated probabilities.<br>
+            • <strong>TF-IDF Vectorizer:</strong> 40,000 sublinear unigram/bigram features with domain debiasing.<br>
+            • <strong>Champion Model:</strong> LinearSVC (99.08% Accuracy, 0.9993 ROC-AUC) & Soft Voting Ensemble.<br>
             • <strong>Explainability:</strong> Linear coefficient word attribution.
         </div>
     </div>
@@ -234,36 +267,44 @@ st.markdown('<div class="section-header">🤖 Evaluated Machine Learning Classif
 
 models = [
     {
+        "name": "Linear SVC (Champion)",
+        "icon": "🎯",
+        "color": "#059669",
+        "desc": "Support Vector Classifier with linear kernel, optimized C=0.8, and CalibratedClassifierCV probability mapping. Peak performer on debiased corpus.",
+        "pros": ["Peak 99.08% Test Accuracy", "0.9993 ROC-AUC score", "Excellent generalization without publisher leakage"],
+        "cons": ["Requires CalibratedClassifierCV for probability estimation"],
+    },
+    {
         "name": "Logistic Regression",
         "icon": "📐",
         "color": "#047857",
-        "desc": "Linear model applying the sigmoid function. Highly interpretable for sparse TF-IDF spaces with fast inference.",
-        "pros": ["Direct word coefficients", "Fast training and inference", "Resilient to noise"],
+        "desc": "Linear model applying the sigmoid function with L2 regularization. Highly interpretable for sparse TF-IDF spaces with fast inference.",
+        "pros": ["98.49% Test Accuracy", "Direct word coefficient explainability", "Sub-millisecond inference time"],
         "cons": ["Linear decision boundary only"],
+    },
+    {
+        "name": "Soft Voting Ensemble",
+        "icon": "🤝",
+        "color": "#0078D4",
+        "desc": "Meta-estimator aggregating calibrated probabilities across LinearSVC, Logistic Regression, and Multinomial Naive Bayes.",
+        "pros": ["98.42% Test Accuracy", "Reduced prediction variance", "Robust consensus across diverse algorithms"],
+        "cons": ["Requires multiple model evaluations per inference"],
+    },
+    {
+        "name": "XGBoost Classifier",
+        "icon": "🚀",
+        "color": "#D97706",
+        "desc": "Gradient boosted decision trees sequentially minimizing residual errors with histogram-based tree building.",
+        "pros": ["95.53% Test Accuracy", "Captures non-linear feature interactions", "Built-in tree regularization"],
+        "cons": ["Higher CPU memory footprint during training"],
     },
     {
         "name": "Multinomial Naive Bayes",
         "icon": "📊",
         "color": "#0D9488",
-        "desc": "Probabilistic model based on Bayes' Theorem. Suited for word frequencies and text counts.",
-        "pros": ["Minimal training time", "Strong NLP baseline", "No hyperparameter sensitivity"],
-        "cons": ["Violates word independence in natural text"],
-    },
-    {
-        "name": "Linear SVC",
-        "icon": "🎯",
-        "color": "#0078D4",
-        "desc": "Support Vector Machine with linear kernel that finds maximum-margin hyperplane separating classes.",
-        "pros": ["Strong generalization on text", "Memory efficient (uses support vectors)"],
-        "cons": ["Requires CalibratedClassifierCV for probabilities"],
-    },
-    {
-        "name": "XGBoost Classifier (Best)",
-        "icon": "🚀",
-        "color": "#059669",
-        "desc": "Gradient boosted decision trees sequentially minimizing residual errors. Top performer on benchmark.",
-        "pros": ["Captures non-linear relationships", "Peak 99.81% accuracy", "Built-in regularization"],
-        "cons": ["Higher training compute cost"],
+        "desc": "Probabilistic model based on Bayes' Theorem with Dirichlet prior smoothing. Serves as our strong NLP baseline.",
+        "pros": ["95.12% Test Accuracy", "Minimal compute overhead", "No hyperparameter sensitivity"],
+        "cons": ["Assumes conditional independence between word tokens"],
     },
 ]
 

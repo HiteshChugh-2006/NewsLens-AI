@@ -310,7 +310,7 @@ with k1:
     """, unsafe_allow_html=True)
 
 with k2:
-    acc = model_stats["accuracy"] if model_stats["loaded"] else "99.81%"
+    acc = model_stats["accuracy"] if model_stats["loaded"] else "99.08%"
     st.markdown(f"""
     <div class="kpi-card">
         <span class="kpi-icon">🎯</span>
@@ -320,7 +320,7 @@ with k2:
     """, unsafe_allow_html=True)
 
 with k3:
-    f1 = model_stats["f1"] if model_stats["loaded"] else "99.75%"
+    f1 = model_stats["f1"] if model_stats["loaded"] else "99.12%"
     st.markdown(f"""
     <div class="kpi-card">
         <span class="kpi-icon">⚡</span>
@@ -330,7 +330,7 @@ with k3:
     """, unsafe_allow_html=True)
 
 with k4:
-    mt = model_stats["models_trained"] if model_stats["loaded"] else "4"
+    mt = model_stats["models_trained"] if model_stats["loaded"] else "5"
     st.markdown(f"""
     <div class="kpi-card">
         <span class="kpi-icon">⚙️</span>
