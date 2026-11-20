@@ -24,6 +24,7 @@ import joblib
 import numpy as np
 from scipy.sparse import spmatrix
 from sklearn.calibration import CalibratedClassifierCV
+from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import GridSearchCV, StratifiedKFold
 from sklearn.naive_bayes import MultinomialNB
@@ -96,14 +97,14 @@ class ModelTrainer:
                     random_state=self.random_state,
                 ),
                 "param_grid": {
-                    "C": [0.1, 1, 10],
+                    "C": [0.5, 1.0, 2.0],
                     "penalty": ["l2"],
                 },
             },
             "MultinomialNB": {
                 "estimator": MultinomialNB(),
                 "param_grid": {
-                    "alpha": [0.1, 0.5, 1.0],
+                    "alpha": [0.1, 0.2, 0.5],
                 },
             },
             "LinearSVC": {
@@ -115,7 +116,32 @@ class ModelTrainer:
                     cv=3,
                 ),
                 "param_grid": {
-                    "estimator__C": [0.1, 1, 10],
+                    "estimator__C": [0.5, 1.0, 2.0],
+                },
+            },
+            "SoftVotingEnsemble": {
+                "estimator": VotingClassifier(
+                    estimators=[
+                        (
+                            "LinearSVC",
+                            CalibratedClassifierCV(
+                                LinearSVC(C=1.0, max_iter=2000, random_state=self.random_state),
+                                cv=3,
+                            ),
+                        ),
+                        (
+                            "LogisticRegression",
+                            LogisticRegression(
+                                C=1.0, max_iter=1000, solver="lbfgs", random_state=self.random_state
+                            ),
+                        ),
+                        ("MultinomialNB", MultinomialNB(alpha=0.2)),
+                    ],
+                    voting="soft",
+                    weights=[1.2, 1.0, 1.0],
+                ),
+                "param_grid": {
+                    "voting": ["soft"],
                 },
             },
         }
@@ -125,12 +151,15 @@ class ModelTrainer:
                 "estimator": XGBClassifier(
                     use_label_encoder=False,
                     eval_metric="logloss",
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    n_jobs=1,
                     random_state=self.random_state,
                     verbosity=0,
                 ),
                 "param_grid": {
-                    "n_estimators": [100],
-                    "max_depth": [3, 5],
+                    "n_estimators": [80],
+                    "max_depth": [4],
                     "learning_rate": [0.1],
                 },
             }
@@ -238,7 +267,16 @@ class ModelTrainer:
         if not results:
             raise RuntimeError("No training results available. Call train_all() first.")
 
-        best_name = max(results, key=lambda k: results[k]["best_score"])
+        # Prefer SoftVotingEnsemble if it is within 0.005 of top score for superior generalization
+        if "SoftVotingEnsemble" in results:
+            top_score = max(r["best_score"] for r in results.values())
+            if results["SoftVotingEnsemble"]["best_score"] >= (top_score - 0.005):
+                best_name = "SoftVotingEnsemble"
+            else:
+                best_name = max(results, key=lambda k: results[k]["best_score"])
+        else:
+            best_name = max(results, key=lambda k: results[k]["best_score"])
+
         logger.info(
             "Best model: %s (CV F1 = %.4f)",
             best_name,

@@ -75,49 +75,55 @@ db = load_database()
 
 # ─── Sample Articles ─────────────────────────────────────────────────────────
 SAMPLE_ARTICLES = {
-    "🏛️ Real World News (Reuters)": {
+    "🇮🇳 Real Space & Science (Chandrayaan-3)": {
         "text": (
-            "WASHINGTON (Reuters) - The U.S. House of Representatives passed a $1.9 trillion "
-            "coronavirus relief package early on Saturday, delivering on President Joe Biden's "
-            "promise to help millions of families and businesses impacted by the pandemic. "
-            "The measure passed on a near party-line vote of 219 to 212. It now heads to the Senate, "
-            "where Democrats plan to use special budget rules to pass it without Republican support. "
-            "The legislation includes $1,400 direct payments, emergency unemployment benefits, and "
-            "expanded funding for vaccine distribution, school reopenings, and local governments."
+            "India made history on 23 August 2023 when the Chandrayaan-3 lander module "
+            "successfully touched down on the lunar south pole, making India the fourth "
+            "country in the world to achieve a soft landing on the Moon and the first to reach the southern polar region."
         ),
-        "source": "Reuters - Factual & Neutral",
+        "source": "ISRO / Science Editorial - Factual & Historical",
     },
-    "👽 Fake Conspiracy (Flagged)": {
+    "🏛️ Real Public Policy & Relief Act": {
+        "text": (
+            "The House of Representatives passed a comprehensive $1.9 trillion "
+            "relief package on Saturday, delivering direct assistance to millions of families and businesses. "
+            "The legislation includes direct economic payments, emergency unemployment benefits, "
+            "and dedicated funding for vaccine distribution, school infrastructure, and state governments."
+        ),
+        "source": "Legislative Record - Factual & Neutral",
+    },
+    "💼 Real Global Financial Markets": {
+        "text": (
+            "Global markets rallied on Wednesday following the central bank announcement signaling "
+            "an end to interest rate hikes. The benchmark S&P 500 gained 1.4% while the tech-heavy Nasdaq "
+            "rose 2.0% as investors priced in easing inflationary pressures and steady economic growth."
+        ),
+        "source": "Financial Bureau - Analytical & Data-Driven",
+    },
+    "👽 Fake Conspiracy (Underground Base)": {
         "text": (
             "BREAKING SHOCKING DISCOVERY: Secret underground alien military base discovered "
-            "directly beneath Washington D.C.! Multiple high-ranking whistleblowers from NASA "
-            "and the Pentagon have fled the country after confirming that world leaders have been "
-            "taking direct orders from extraterrestrial entities for over four decades. "
-            "Mainstream media outlets are refusing to cover this explosive revelation because "
-            "they are controlled by the same deep state shadow network! SHARE THIS EVERYWHERE "
-            "BEFORE IT GETS COMPLETELY CENSORED AND WIPED FROM THE INTERNET!"
+            "directly beneath city hall! Multiple whistleblowers from NASA and the Pentagon fled "
+            "after confirming world leaders take direct orders from extraterrestrial entities for four decades. "
+            "Share this everywhere before it gets censored and deleted from the internet!"
         ),
-        "source": "Flagged Source - Sensational & False",
+        "source": "Flagged Source - Sensational & Unverified",
     },
-    "💼 Real Business News (Reuters)": {
+    "🗳️ Fake Political Rumor (Election Fraud)": {
         "text": (
-            "NEW YORK (Reuters) - U.S. stocks rallied sharply on Wednesday following the Federal "
-            "Reserve's monetary policy announcement, in which the central bank signaled it may be "
-            "nearing the end of its rate-hiking campaign. The benchmark S&P 500 gained 1.4%, while "
-            "the tech-heavy Nasdaq Composite jumped 2.0%. Treasury yields retreated across the curve "
-            "as investors priced in the likelihood of a soft landing for the world's largest economy."
+            "EXPOSED: Bombshell leaks prove corrupt officials secretly shredded over five million "
+            "legitimate ballots in three swing states! Anonymous insiders provided indisputable video "
+            "evidence showing shredding trucks operating outside counting centers at 3:00 AM."
         ),
-        "source": "Reuters - Factual & Analytical",
+        "source": "Flagged Source - Emotionally Charged & Fabricated",
     },
-    "🗳️ Fake Political Rumor (Flagged)": {
+    "💊 Fake Medical Miracle (Health Clickbait)": {
         "text": (
-            "EXPOSED: Bombshell leaks prove corrupt election officials secretly destroyed over "
-            "five million legitimate ballots in three swing states! Anonymous insiders have provided "
-            "indisputable video evidence showing shredding trucks operating outside counting centers "
-            "at 3:00 AM. The federal judiciary has refused to hear the evidence because of blatant "
-            "systemic bias. The entire election was completely stolen and illegitimate!"
+            "Miracle cure found in common household lemon water cures cancer and diabetes instantly! "
+            "Big pharma doctors are terrified that you will discover this one secret trick. "
+            "Drink this every morning to eliminate all illnesses completely."
         ),
-        "source": "Flagged Source - Emotionally Charged & Unverified",
+        "source": "Flagged Source - Medical Misinformation",
     },
 }
 

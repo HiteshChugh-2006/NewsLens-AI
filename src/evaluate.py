@@ -249,8 +249,16 @@ class ModelEvaluator:
         """
         coefs: Optional[np.ndarray] = None
 
-        # Unwrap CalibratedClassifierCV
+        # Unwrap VotingClassifier if needed
         _model = model
+        if hasattr(_model, "named_estimators_"):
+            _model = (
+                _model.named_estimators_.get("LinearSVC")
+                or _model.named_estimators_.get("LogisticRegression")
+                or list(_model.named_estimators_.values())[0]
+            )
+
+        # Unwrap CalibratedClassifierCV
         if hasattr(_model, "calibrated_classifiers_"):
             _model = _model.calibrated_classifiers_[0].estimator
 

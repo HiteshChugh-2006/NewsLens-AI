@@ -38,16 +38,34 @@ class TestNewsArticleAnalysisSystem(unittest.TestCase):
         cls.predictor = NewsPredictor(model_path=cls.model_path, vectorizer_path=cls.vec_path)
 
     def test_01_normal_article_classification(self):
-        """Test normal news article classification."""
+        """Test normal news article classification and generalisation without publisher bias."""
         sample_text = (
-            "WASHINGTON (Reuters) - The White House and congressional leaders reached an agreement "
+            "The White House and congressional leaders reached an agreement "
             "on budget caps and the debt limit on Tuesday, paving the way for a two-year fiscal deal."
         )
         res = self.predictor.predict(sample_text)
         self.assertIn("prediction", res)
         self.assertIn("confidence", res)
-        self.assertIn(res["prediction"], ["REAL", "FAKE"])
+        self.assertEqual(res["prediction"], "REAL")
         self.assertGreaterEqual(res["confidence"], 0.5)
+
+        # Test modern authentic news without wire publisher dateline
+        chandrayaan = (
+            "India made history on 23 August 2023 when the Chandrayaan-3 lander module "
+            "successfully touched down on the lunar south pole, making India the fourth "
+            "country in the world to achieve a soft landing on the Moon and the first to reach the southern polar region."
+        )
+        res_ch = self.predictor.predict(chandrayaan)
+        self.assertEqual(res_ch["prediction"], "REAL")
+
+        # Test sensational fake conspiracy
+        fake_sample = (
+            "BREAKING SHOCKING DISCOVERY: Secret underground alien military base discovered "
+            "directly beneath city hall! Multiple whistleblowers fled after confirming world leaders "
+            "take direct orders from extraterrestrial entities. Share before it gets deleted!"
+        )
+        res_fake = self.predictor.predict(fake_sample)
+        self.assertEqual(res_fake["prediction"], "FAKE")
 
     def test_02_empty_article_handling(self):
         """Test handling of empty text input."""

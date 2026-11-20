@@ -217,10 +217,24 @@ class NewsPredictor:
         # Try to get model coefficients
         coefs: Optional[np.ndarray] = None
         _model = self.model
+        if hasattr(_model, "named_estimators_"):
+            _model = (
+                _model.named_estimators_.get("LinearSVC")
+                or _model.named_estimators_.get("LogisticRegression")
+                or list(_model.named_estimators_.values())[0]
+            )
         if hasattr(_model, "calibrated_classifiers_"):
-            _model = _model.calibrated_classifiers_[0].estimator
-        if hasattr(_model, "coef_"):
+            all_coefs = [
+                np.asarray(cc.estimator.coef_).ravel()
+                for cc in _model.calibrated_classifiers_
+                if hasattr(cc.estimator, "coef_")
+            ]
+            if all_coefs:
+                coefs = np.mean(all_coefs, axis=0)
+        elif hasattr(_model, "coef_"):
             coefs = np.asarray(_model.coef_).ravel()
+        elif hasattr(_model, "feature_importances_"):
+            coefs = np.asarray(_model.feature_importances_).ravel()
 
         if coefs is not None and len(coefs) == len(tfidf_weights):
             contributions = tfidf_weights * coefs

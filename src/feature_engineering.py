@@ -19,6 +19,8 @@ import pandas as pd
 from scipy.sparse import spmatrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 
+from src.preprocessing import DOMAIN_STOPWORDS
+
 logger = logging.getLogger(__name__)
 
 
@@ -27,16 +29,16 @@ class FeatureEngineer:
 
     Parameters
     ----------
-    max_features : int, default 50_000
+    max_features : int, default 40_000
         Maximum vocabulary size.
     ngram_range : tuple, default (1, 2)
         Unigram + bigram features.
     sublinear_tf : bool, default True
         Apply sub-linear TF scaling (``1 + log(tf)``).
-    min_df : int, default 2
+    min_df : int, default 5
         Ignore terms that appear in fewer than *min_df* documents.
-    max_df : float, default 0.95
-        Ignore terms that appear in more than 95 % of documents.
+    max_df : float, default 0.70
+        Ignore terms that appear in more than 70 % of documents.
 
     Examples
     --------
@@ -48,17 +50,19 @@ class FeatureEngineer:
 
     def __init__(
         self,
-        max_features: int = 50_000,
+        max_features: int = 40_000,
         ngram_range: Tuple[int, int] = (1, 2),
         sublinear_tf: bool = True,
-        min_df: int = 2,
-        max_df: float = 0.95,
+        min_df: int = 5,
+        max_df: float = 0.70,
+        custom_stop_words: Optional[List[str]] = None,
     ) -> None:
         self.max_features = max_features
         self.ngram_range = ngram_range
         self.sublinear_tf = sublinear_tf
         self.min_df = min_df
         self.max_df = max_df
+        self.custom_stop_words = list(DOMAIN_STOPWORDS) if custom_stop_words is None else custom_stop_words
 
         self._vectorizer = TfidfVectorizer(
             max_features=self.max_features,
@@ -69,6 +73,7 @@ class FeatureEngineer:
             strip_accents="unicode",
             analyzer="word",
             token_pattern=r"(?u)\b\w\w+\b",
+            stop_words=self.custom_stop_words,
         )
         self._is_fitted: bool = False
 

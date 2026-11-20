@@ -59,6 +59,33 @@ _RE_PUNCT = re.compile(f"[{re.escape(string.punctuation)}]")
 _RE_DIGITS = re.compile(r"\d+")
 _RE_WHITESPACE = re.compile(r"\s+")
 
+# Agency datelines: e.g. "WASHINGTON (Reuters) - ", "SEATTLE/WASHINGTON (Reuters) - ", "(Reuters) - "
+_RE_DATELINE = re.compile(
+    r"(?:\b[a-zA-Z]{2,20}(?:/[a-zA-Z]{2,20})?\s+)?\((?:Reuters|AP|AFP)\)\s*[-–—:]\s*",
+    re.IGNORECASE,
+)
+
+# Standalone wire agency references and artifacts
+_RE_AGENCY_TOKENS = re.compile(
+    r"\b(?:reuters|associated\s+press|bloomberg\s+news|afp\s+news)\b",
+    re.IGNORECASE,
+)
+
+# Footers, photo credits, and social media watermarks in web scrapings
+_RE_WATERMARKS = re.compile(
+    r"(?:featured\s+image\s+(?:via)?\s*.*$|image\s+via\s+.*$|photo\s+(?:by|credit)\s*:\s*.*$|"
+    r"pic\.twitter\.com/\S+|twitter\.com/\S+|facebook\.com/\S+|instagram\.com/\S+|"
+    r"21st\s+century\s+wire|daily\s+caller|breitbart\s+news|infowars)",
+    re.IGNORECASE | re.MULTILINE,
+)
+
+# Domain stopwords for fake/real news debiasing
+DOMAIN_STOPWORDS = {
+    "reuters", "reuter", "image", "images", "featured", "via", "photo",
+    "pic", "twitter", "tweet", "getty", "century", "wire", "daily",
+    "caller", "breitbart", "video", "watch", "post", "facebook", "url",
+}
+
 
 class TextPreprocessor:
     """Reusable text preprocessor with a scikit-learn-style fit/transform API.
@@ -105,8 +132,8 @@ class TextPreprocessor:
         scikit-learn ``Pipeline``.
         """
         if self.remove_stopwords:
-            self._stop_words = set(stopwords.words("english"))
-            logger.debug("Loaded %d English stopwords.", len(self._stop_words))
+            self._stop_words = set(stopwords.words("english")) | DOMAIN_STOPWORDS
+            logger.debug("Loaded %d English + domain stopwords.", len(self._stop_words))
         if self.lemmatize:
             self._lemmatizer = WordNetLemmatizer()
         self._is_fitted = True
@@ -157,16 +184,19 @@ class TextPreprocessor:
         """Clean a single text string.
 
         Steps applied (in order):
-            1. Lowercase
-            2. URL removal
-            3. HTML tag removal
-            4. Punctuation removal
-            5. Digit removal
-            6. Tokenization
-            7. Stopword removal (optional)
-            8. Lemmatization (optional)
-            9. Short-token removal
-            10. Re-join tokens
+            1. Agency dateline removal (strips "CITY (Reuters) - " / wire prefixes)
+            2. Social media, photo credit & publisher watermark removal
+            3. Standalone wire agency reference removal
+            4. URL removal
+            5. HTML tag removal
+            6. Lowercase
+            7. Punctuation removal
+            8. Digit removal
+            9. Whitespace collapse & Tokenization
+            10. Stopword removal (English + domain debiasing stops)
+            11. Lemmatization (WordNet)
+            12. Short-token removal
+            13. Re-join tokens
 
         Parameters
         ----------
@@ -185,34 +215,43 @@ class TextPreprocessor:
         if not self._is_fitted:
             self.fit()
 
-        # 1. Lowercase
+        # 1. Remove agency datelines (e.g. "WASHINGTON (Reuters) - ")
+        text = _RE_DATELINE.sub(" ", text)
+
+        # 2. Remove footer/image/social media watermarks
+        text = _RE_WATERMARKS.sub(" ", text)
+
+        # 3. Remove standalone wire agency tokens
+        text = _RE_AGENCY_TOKENS.sub(" ", text)
+
+        # 4. Remove URLs
+        text = _RE_URL.sub(" ", text)
+
+        # 5. Remove HTML tags
+        text = _RE_HTML.sub(" ", text)
+
+        # 6. Lowercase
         text = text.lower()
 
-        # 2. Remove URLs
-        text = _RE_URL.sub("", text)
-
-        # 3. Remove HTML tags
-        text = _RE_HTML.sub("", text)
-
-        # 4. Remove punctuation
+        # 7. Remove punctuation
         text = _RE_PUNCT.sub(" ", text)
 
-        # 5. Remove digits
-        text = _RE_DIGITS.sub("", text)
+        # 8. Remove digits
+        text = _RE_DIGITS.sub(" ", text)
 
-        # 6. Collapse whitespace then tokenize
+        # 9. Collapse whitespace then tokenize
         text = _RE_WHITESPACE.sub(" ", text).strip()
         tokens: List[str] = word_tokenize(text)
 
-        # 7. Stopword removal
+        # 10. Stopword removal
         if self.remove_stopwords and self._stop_words:
             tokens = [t for t in tokens if t not in self._stop_words]
 
-        # 8. Lemmatization
+        # 11. Lemmatization
         if self.lemmatize and self._lemmatizer:
             tokens = [self._lemmatizer.lemmatize(t) for t in tokens]
 
-        # 9. Drop short tokens
+        # 12. Drop short tokens
         tokens = [t for t in tokens if len(t) >= self.min_token_length]
 
         return " ".join(tokens)
