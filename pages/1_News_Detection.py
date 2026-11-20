@@ -214,12 +214,17 @@ if predictor is None:
 # ─── Sample Selection ────────────────────────────────────────────────────────
 st.markdown('<div class="section-header">⚡ Load Quick Sample Articles</div>', unsafe_allow_html=True)
 
-sample_cols = st.columns(4)
-for i, (name, data) in enumerate(SAMPLE_ARTICLES.items()):
-    with sample_cols[i]:
-        if st.button(name, use_container_width=True):
-            st.session_state["input_text"] = data["text"]
-            st.rerun()
+# Render sample buttons in responsive rows of 3 columns
+items = list(SAMPLE_ARTICLES.items())
+chunk_size = 3
+for chunk_start in range(0, len(items), chunk_size):
+    chunk = items[chunk_start : chunk_start + chunk_size]
+    cols = st.columns(len(chunk))
+    for col, (name, data) in zip(cols, chunk):
+        with col:
+            if st.button(name, use_container_width=True):
+                st.session_state["input_text"] = data["text"]
+                st.rerun()
 
 
 # ─── Input Form ──────────────────────────────────────────────────────────────
