@@ -1,6 +1,6 @@
 """
-AI-Based News Article Analysis - Analysis History Page
-======================================================
+NewsLens AI - Analysis History Log
+==================================
 View, search, inspect, and manage stored article analysis history
 from the local SQLite database (news_analysis.db).
 """
@@ -9,7 +9,6 @@ import streamlit as st
 import pandas as pd
 import os
 import sys
-import json
 
 # Ensure project root is in sys.path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,96 +16,19 @@ if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
 from src.database import AnalysisDatabase
+from src.styles import get_custom_css
 
 # ─── Page Configuration ──────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="Analysis History | AI News Analyzer",
+    page_title="Analysis History | NewsLens AI",
     page_icon="📜",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
-# ─── Shared CSS ──────────────────────────────────────────────────────────────
-SHARED_CSS = """
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-html, body, [data-testid="stAppViewContainer"] { font-family: 'Inter', sans-serif; }
-[data-testid="stAppViewContainer"] {
-    background: linear-gradient(135deg, #0e1117 0%, #1a1a2e 50%, #0e1117 100%);
-}
-[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
-    border-right: 1px solid rgba(0, 212, 255, 0.1);
-}
-.kpi-card {
-    background: linear-gradient(135deg, #1e2a3a 0%, #16213e 100%);
-    border: 1px solid rgba(0, 212, 255, 0.2);
-    border-radius: 16px; padding: 22px 20px; text-align: center;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.05);
-    position: relative; overflow: hidden;
-}
-.kpi-card::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-    background: linear-gradient(90deg, #00d4ff, #00ff88); border-radius: 16px 16px 0 0;
-}
-.kpi-value { font-size: 2.2rem; font-weight: 800;
-    background: linear-gradient(135deg, #00d4ff, #00ff88);
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-}
-.kpi-label { font-size: 0.82rem; color: #8899aa; text-transform: uppercase;
-    letter-spacing: 1.5px; font-weight: 600; margin-top: 4px; }
-.section-header { font-size: 1.4rem; font-weight: 700; color: #e0e0e0;
-    margin: 32px 0 16px; padding-bottom: 10px;
-    border-bottom: 2px solid rgba(0, 212, 255, 0.2); }
-.gradient-divider { height: 2px;
-    background: linear-gradient(90deg, transparent, #00d4ff, #00ff88, transparent);
-    border: none; margin: 25px 0; border-radius: 2px; }
+# ─── Microsoft Fluent Light Theme CSS ────────────────────────────────────────
+st.markdown(get_custom_css(), unsafe_allow_html=True)
 
-/* Detail Card */
-.detail-card {
-    background: linear-gradient(135deg, #1e2a3a 0%, #16213e 100%);
-    border: 1px solid rgba(0, 212, 255, 0.2);
-    border-radius: 16px; padding: 24px;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.25);
-    margin: 16px 0;
-}
-
-/* Badges */
-.badge-fake {
-    background: rgba(255, 71, 87, 0.2);
-    color: #ff4757;
-    border: 1px solid rgba(255, 71, 87, 0.5);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-.badge-real {
-    background: rgba(0, 255, 136, 0.2);
-    color: #00ff88;
-    border: 1px solid rgba(0, 255, 136, 0.5);
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 0.85rem;
-}
-
-/* Phrase tag */
-.phrase-tag {
-    display: inline-block;
-    padding: 5px 14px;
-    margin: 4px;
-    border-radius: 50px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    background: rgba(0, 212, 255, 0.1);
-    color: #00d4ff;
-    border: 1px solid rgba(0, 212, 255, 0.25);
-}
-</style>
-"""
-
-st.markdown(SHARED_CSS, unsafe_allow_html=True)
 
 # ─── Initialize Database ─────────────────────────────────────────────────────
 @st.cache_resource
@@ -115,51 +37,52 @@ def get_database():
 
 db = get_database()
 
+
 # ─── Sidebar ─────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
-    <div style="text-align:center; padding: 20px 0;">
-        <div style="font-size: 3rem;">📜</div>
-        <div style="font-size: 1.15rem; font-weight: 700; color: #00d4ff; margin-top: 8px;">
-            Analysis History
+    <div class="sidebar-brand-card">
+        <div style="font-size: 2.2rem; margin-bottom: 4px;">📜</div>
+        <div style="font-size: 1.2rem; font-weight: 800; color: #047857;">
+            NewsLens AI
         </div>
-        <div style="font-size: 0.72rem; color: #556677; margin-top: 4px; letter-spacing: 1px;">
-            SQLITE AUDIT TRAIL
+        <div style="font-size: 0.72rem; color: #64748B; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;">
+            SQLite Audit Trail
         </div>
     </div>
     """, unsafe_allow_html=True)
-    st.markdown('<div class="gradient-divider"></div>', unsafe_allow_html=True)
 
     st.markdown("""
-    <div style="padding: 10px 0; color: #8899aa; font-size: 0.85rem; line-height: 1.8;">
-        This page queries the local <strong style="color:#00d4ff;">news_analysis.db</strong> SQLite database.
+    <div style="padding: 4px; color: #64748B; font-size: 0.82rem; line-height: 1.7;">
+        Querying local database:
+        <br><code style="color: #047857; font-weight: 600;">news_analysis.db</code>
         <br><br>
-        All records store:
-        <ul style="padding-left: 18px; margin-top: 6px;">
-            <li>Input news article</li>
+        <strong>Stored Attributes:</strong>
+        <ul style="padding-left: 18px; margin-top: 4px;">
+            <li>Article body & preview</li>
             <li>ML classification & confidence</li>
-            <li>Azure sentiment & scores</li>
-            <li>Azure extracted key phrases</li>
-            <li>Timestamp</li>
+            <li>Azure sentiment & tone distribution</li>
+            <li>Extracted thematic key phrases</li>
+            <li>Audit timestamp</li>
         </ul>
     </div>
     """, unsafe_allow_html=True)
 
     st.markdown('<div class="gradient-divider"></div>', unsafe_allow_html=True)
 
-    if st.button("🔄 Refresh Database Records", use_container_width=True):
+    if st.button("🔄 Refresh Database", use_container_width=True):
         st.rerun()
 
 
 # ─── Header ──────────────────────────────────────────────────────────────────
 st.markdown("""
-<div style="text-align: center; padding: 20px 0 10px;">
-    <div style="font-size: 2.5rem; font-weight: 800;
-        background: linear-gradient(135deg, #00d4ff, #00ff88);
+<div style="text-align: center; padding: 16px 0 8px;">
+    <div style="font-size: 2.4rem; font-weight: 800;
+        background: linear-gradient(135deg, #065F46 0%, #059669 50%, #0D9488 100%);
         -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
-        📜 Analysis History Log
+        📜 Analysis History & Audit Log
     </div>
-    <div style="color: #8899aa; font-size: 1rem; margin-top: 6px;">
+    <div style="color: #64748B; font-size: 1rem; margin-top: 6px;">
         Auditable database records of all processed news articles with ML and Azure AI Language outputs
     </div>
 </div>
@@ -184,7 +107,7 @@ with k1:
 with k2:
     st.markdown(f"""
     <div class="kpi-card">
-        <span class="kpi-value" style="color:#ff4757; -webkit-text-fill-color:#ff4757;">{stats['fake']}</span>
+        <span class="kpi-value" style="color:#E11D48;">{stats['fake']}</span>
         <div class="kpi-label">Fake Flagged</div>
     </div>
     """, unsafe_allow_html=True)
@@ -192,7 +115,7 @@ with k2:
 with k3:
     st.markdown(f"""
     <div class="kpi-card">
-        <span class="kpi-value" style="color:#00ff88; -webkit-text-fill-color:#00ff88;">{stats['real']}</span>
+        <span class="kpi-value" style="color:#059669;">{stats['real']}</span>
         <div class="kpi-label">Real Verified</div>
     </div>
     """, unsafe_allow_html=True)
@@ -202,7 +125,7 @@ with k4:
     display_ts = last_ts.split(".")[0] if last_ts else "None"
     st.markdown(f"""
     <div class="kpi-card">
-        <span class="kpi-value" style="font-size: 1.25rem; padding-top: 10px;">{display_ts}</span>
+        <span class="kpi-value" style="font-size: 1.25rem; padding-top: 6px; color: #334155;">{display_ts}</span>
         <div class="kpi-label">Latest Timestamp</div>
     </div>
     """, unsafe_allow_html=True)
@@ -214,14 +137,14 @@ all_records = db.get_all_records()
 if not all_records:
     st.markdown("<br>", unsafe_allow_html=True)
     st.markdown("""
-    <div class="detail-card" style="text-align: center; padding: 40px 20px;">
-        <span style="font-size: 3rem;">📭</span>
-        <div style="font-size: 1.3rem; font-weight: 700; color: #00d4ff; margin-top: 12px;">
+    <div class="info-card" style="text-align: center; padding: 40px 20px;">
+        <span style="font-size: 2.8rem;">📭</span>
+        <div style="font-size: 1.25rem; font-weight: 700; color: #047857; margin-top: 10px;">
             No Analysis Records in SQLite Database
         </div>
-        <div style="color: #8899aa; font-size: 0.95rem; max-width: 600px; margin: 10px auto 20px;">
-            Whenever you run an article analysis on the <strong>1_News_Detection</strong> page, 
-            the complete result (ML prediction, sentiment, and key phrases) is automatically stored here.
+        <div style="color: #64748B; font-size: 0.9rem; max-width: 580px; margin: 8px auto 16px;">
+            Whenever you run an article analysis on the <strong>News Detection</strong> page, 
+            the complete output (ML prediction, Azure sentiment, and key phrases) is automatically stored here.
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -246,7 +169,7 @@ else:
         )
 
     with fcol3:
-        search_query = st.text_input("Search in Article Text:", placeholder="Type a keyword to filter...")
+        search_query = st.text_input("Search Article Keywords:", placeholder="Type a keyword to filter...")
 
     # Apply filtering
     filtered_records = []
@@ -259,12 +182,12 @@ else:
             continue
         filtered_records.append(r)
 
-    st.markdown(f"**Showing {len(filtered_records)} of {len(all_records)} total records**")
+    st.caption(f"Showing **{len(filtered_records)}** of **{len(all_records)}** total stored records")
 
     # Build display table
     table_rows = []
     for r in filtered_records:
-        snippet = (r["article_text"][:70] + "...") if len(r["article_text"]) > 70 else r["article_text"]
+        snippet = (r["article_text"][:65] + "...") if len(r["article_text"]) > 65 else r["article_text"]
         pred_icon = "🚨 Fake" if r["ml_prediction"] == "FAKE" else "✅ Real"
         conf_str = f"{r['ml_confidence']:.1%}" if r["ml_confidence"] is not None else "N/A"
         sent_display = r["sentiment"].capitalize()
@@ -290,7 +213,7 @@ else:
     st.markdown('<div class="section-header">🔎 Inspect Individual Record Details</div>', unsafe_allow_html=True)
 
     available_ids = [r["id"] for r in filtered_records] if filtered_records else [r["id"] for r in all_records]
-    
+
     selected_id = st.selectbox(
         "Select Record ID to view complete details:",
         options=available_ids,
@@ -301,13 +224,13 @@ else:
         record = db.get_record_by_id(selected_id)
         if record:
             st.markdown(f"""
-            <div class="detail-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div style="font-size: 1.25rem; font-weight: 700; color: #00d4ff;">
-                        Record #{record['id']} — Details
+            <div class="info-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">
+                    <div style="font-size: 1.2rem; font-weight: 800; color: #047857;">
+                        Record #{record['id']} — Comprehensive Audit
                     </div>
-                    <div style="font-size: 0.85rem; color: #8899aa;">
-                        🕒 Stored At: <strong style="color: #e0e0e0;">{record['created_at']}</strong>
+                    <div style="font-size: 0.82rem; color: #64748B;">
+                        🕒 Stored At: <strong style="color: #0F172A;">{record['created_at']}</strong>
                     </div>
                 </div>
             </div>
@@ -317,51 +240,52 @@ else:
 
             with dcol1:
                 st.markdown("""
-                <div style="font-weight: 700; color: #00ff88; margin-bottom: 8px;">
-                    🤖 Machine Learning Prediction
+                <div style="font-weight: 700; color: #047857; margin-bottom: 6px;">
+                    🤖 Machine Learning Classification
                 </div>
                 """, unsafe_allow_html=True)
 
-                pred_badge = "badge-fake" if record["ml_prediction"] == "FAKE" else "badge-real"
-                pred_label = "🚨 FAKE NEWS" if record["ml_prediction"] == "FAKE" else "✅ REAL NEWS"
+                is_fake = record["ml_prediction"] == "FAKE"
+                pred_label = "🚨 FAKE NEWS" if is_fake else "✅ REAL NEWS"
                 conf_val = f"{record['ml_confidence']:.2%}" if record["ml_confidence"] is not None else "N/A"
+                badge_style = "color: #E11D48; background: #FFF1F2; border: 1px solid #FECDD3;" if is_fake else "color: #047857; background: #ECFDF5; border: 1px solid #A7F3D0;"
 
                 st.markdown(f"""
-                <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 10px; margin-bottom: 12px;">
-                    <div>Prediction: <span class="{pred_badge}">{pred_label}</span></div>
-                    <div style="margin-top: 8px; color: #8899aa;">Confidence: <strong style="color: #e0e0e0;">{conf_val}</strong></div>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px; border-radius: 10px; margin-bottom: 12px;">
+                    <div>Verdict: <span style="display: inline-block; padding: 3px 12px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; {badge_style}">{pred_label}</span></div>
+                    <div style="margin-top: 8px; color: #64748B; font-size: 0.88rem;">Model Confidence: <strong style="color: #0F172A;">{conf_val}</strong></div>
                 </div>
                 """, unsafe_allow_html=True)
 
             with dcol2:
                 st.markdown("""
-                <div style="font-weight: 700; color: #50e6ff; margin-bottom: 8px;">
-                    ☁️ Azure AI Language Sentiment
+                <div style="font-weight: 700; color: #0078D4; margin-bottom: 6px;">
+                    ☁️ Microsoft Azure AI Sentiment
                 </div>
                 """, unsafe_allow_html=True)
 
                 sent_name = record["sentiment"].capitalize()
                 conf_obj = record.get("sentiment_confidence") or {}
-                
-                pos_sc = f"{conf_obj.get('positive', 0):.2%}" if isinstance(conf_obj, dict) else "N/A"
-                neu_sc = f"{conf_obj.get('neutral', 0):.2%}" if isinstance(conf_obj, dict) else "N/A"
-                neg_sc = f"{conf_obj.get('negative', 0):.2%}" if isinstance(conf_obj, dict) else "N/A"
+
+                pos_sc = f"{conf_obj.get('positive', 0):.2%}" if isinstance(conf_obj, dict) and "positive" in conf_obj else "N/A"
+                neu_sc = f"{conf_obj.get('neutral', 0):.2%}" if isinstance(conf_obj, dict) and "neutral" in conf_obj else "N/A"
+                neg_sc = f"{conf_obj.get('negative', 0):.2%}" if isinstance(conf_obj, dict) and "negative" in conf_obj else "N/A"
 
                 st.markdown(f"""
-                <div style="background: rgba(0,0,0,0.2); padding: 14px; border-radius: 10px; margin-bottom: 12px;">
-                    <div>Overall Sentiment: <strong style="color: #00d4ff;">{sent_name}</strong></div>
-                    <div style="margin-top: 8px; font-size: 0.82rem; color: #8899aa;">
-                        Positive: <span style="color:#00ff88;">{pos_sc}</span> | 
-                        Neutral: <span style="color:#ffa500;">{neu_sc}</span> | 
-                        Negative: <span style="color:#ff4757;">{neg_sc}</span>
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; padding: 14px; border-radius: 10px; margin-bottom: 12px;">
+                    <div>Overall Tone: <strong style="color: #0078D4;">{sent_name}</strong></div>
+                    <div style="margin-top: 8px; font-size: 0.82rem; color: #64748B;">
+                        Positive: <span style="color:#059669; font-weight: 600;">{pos_sc}</span> | 
+                        Neutral: <span style="color:#D97706; font-weight: 600;">{neu_sc}</span> | 
+                        Negative: <span style="color:#E11D48; font-weight: 600;">{neg_sc}</span>
                     </div>
                 </div>
                 """, unsafe_allow_html=True)
 
             # Key Phrases
             st.markdown("""
-            <div style="font-weight: 700; color: #ffa500; margin-top: 10px; margin-bottom: 8px;">
-                🔑 Extracted Key Phrases
+            <div style="font-weight: 700; color: #D97706; margin-top: 10px; margin-bottom: 6px;">
+                🔑 Extracted Key Phrases & Entities
             </div>
             """, unsafe_allow_html=True)
 
@@ -373,7 +297,7 @@ else:
 
             # Full Article Text
             st.markdown("""
-            <div style="font-weight: 700; color: #00d4ff; margin-top: 18px; margin-bottom: 8px;">
+            <div style="font-weight: 700; color: #0F172A; margin-top: 16px; margin-bottom: 6px;">
                 📄 Full Article Text
             </div>
             """, unsafe_allow_html=True)
@@ -395,25 +319,25 @@ else:
 
 
     # ─── Clear History Section (Danger Zone) ──────────────────────────────────
-    st.markdown('<div class="section-header" style="color: #ff4757; border-color: rgba(255,71,87,0.3);">⚠️ Database Management</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header" style="color: #E11D48; border-color: rgba(225,29,72,0.3);">⚠️ Database Administration</div>', unsafe_allow_html=True)
 
     with st.expander("🚨 Clear All Analysis Records"):
-        st.warning("This action is irreversible. All records stored in `news_analysis.db` will be permanently removed.")
-        confirm_check = st.checkbox("Yes, I understand and want to wipe all stored analysis history.")
+        st.warning("This action is permanent and cannot be undone. All records stored in `news_analysis.db` will be wiped.")
+        confirm_check = st.checkbox("Yes, I understand and want to permanently clear all audit history.")
         if st.button("Permanently Clear Database", type="primary", disabled=not confirm_check):
             db.clear_history()
-            st.success("Analysis history cleared successfully.")
+            st.success("All analysis records cleared successfully.")
             st.rerun()
 
 
 # ─── Footer ──────────────────────────────────────────────────────────────────
 st.markdown("""
-<div class="footer" style="text-align: center; padding: 40px 20px 20px; margin-top: 50px; border-top: 1px solid rgba(0, 212, 255, 0.1); color: #556677; font-size: 0.85rem;">
-    <div style="margin-bottom: 8px;">
-        <span style="color: #00d4ff;">📰 AI-Based News Article Analysis System</span> · <span style="color: #00ff88;">v2.0.0</span>
+<div class="footer">
+    <div style="margin-bottom: 4px; font-weight: 600; color: #0F172A;">
+        NewsLens AI · SQLite Audit Engine
     </div>
-    <div>
-        Persistent storage powered by SQLite · news_analysis.db
+    <div style="font-size: 0.75rem; color: #94A3B8;">
+        ACID compliant storage powered by SQLite3 · news_analysis.db
     </div>
 </div>
 """, unsafe_allow_html=True)

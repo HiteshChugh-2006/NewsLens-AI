@@ -62,8 +62,8 @@ class AzureLanguageAnalyzer:
         endpoint: Optional[str] = None,
         key: Optional[str] = None,
     ) -> None:
-        self._endpoint = endpoint or os.environ.get("AZURE_LANGUAGE_ENDPOINT", "").strip()
-        self._key = key or os.environ.get("AZURE_LANGUAGE_KEY", "").strip()
+        self._endpoint = endpoint if endpoint is not None else os.environ.get("AZURE_LANGUAGE_ENDPOINT", "").strip()
+        self._key = key if key is not None else os.environ.get("AZURE_LANGUAGE_KEY", "").strip()
         self._client = None
         self.is_configured: bool = False
         self.configuration_message: str = ""
