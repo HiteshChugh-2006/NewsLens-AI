@@ -13,7 +13,7 @@ from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.oxml import parse_xml, OxmlElement
 from docx.oxml.ns import nsdecls, qn
 
-BASE_DIR = r"C:\Users\Asus\.gemini\antigravity\scratch\CodeAlpha_Fake-News-Detection-System"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 REPORTS_DIR = os.path.join(BASE_DIR, "reports")
 USER_UPLOADED_DIR = r"C:\Users\Asus\.gemini\antigravity\brain\cac6ab5a-7367-4f3f-baad-01253018ed63\.user_uploaded"
 OUTPUT_DOCX_PATH = os.path.join(BASE_DIR, "docs", "Industrial_Internship_Report.docx")
